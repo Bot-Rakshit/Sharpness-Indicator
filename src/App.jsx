@@ -42,13 +42,6 @@ function App() {
     return move !== null
   }, [makeAMove])
 
-  const toggleEditMode = useCallback(() => {
-    if (editMode) {
-      handleFenSubmit();
-    }
-    setEditMode((prev) => !prev);
-  }, [editMode, handleFenSubmit]);
-
   const handleFenSubmit = useCallback(() => {
     try {
       const newGame = new Chess(fenValue)
@@ -61,6 +54,13 @@ function App() {
       alert('Invalid FEN string')
     }
   }, [fenValue])
+
+  const toggleEditMode = useCallback(() => {
+    if (editMode) {
+      handleFenSubmit();
+    }
+    setEditMode((prev) => !prev);
+  }, [editMode, handleFenSubmit]);
 
   const handleMoveSelect = useCallback((index) => {
     const newGame = new Chess()
