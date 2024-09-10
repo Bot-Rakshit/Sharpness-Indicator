@@ -1,11 +1,19 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 
 const MoveTable = ({ moves, currentMove, onMoveSelect }) => {
+  const moveListRef = useRef(null);
+
+  useEffect(() => {
+    if (moveListRef.current) {
+      moveListRef.current.scrollTop = moveListRef.current.scrollHeight;
+    }
+  }, [moves]);
+
   return (
     <div className="move-table">
       <h3>Moves</h3>
-      <div className="move-list">
+      <div className="move-list" ref={moveListRef}>
         {Array.from({ length: Math.ceil(moves.length / 2) }, (_, i) => (
           <div key={i} className="move-row">
             <div

@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Chess } from 'chess.js'
 import { Chessboard } from 'react-chessboard'
 import './App.css'
-import './Loader.css' // Add this import
-import MoveTable from './MoveTable';
+import './Loader.css'
+import MoveTable from './MoveTable'
 
 function App() {
   const [game, setGame] = useState(new Chess())
@@ -14,43 +14,42 @@ function App() {
   const [editMode, setEditMode] = useState(false)
   const [sharpness, setSharpness] = useState(null)
   const [evaluation, setEvaluation] = useState(null)
-  const [isLoading, setIsLoading] = useState(false) // Add this state
+  const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
     setFenValue(game.fen())
   }, [game])
 
-  function makeAMove(move) {
+  const makeAMove = useCallback((move) => {
     const gameCopy = new Chess(game.fen())
     const result = gameCopy.move(move)
-    setGame(gameCopy)
-    setFen(gameCopy.fen())
     if (result) {
+      setGame(gameCopy)
+      setFen(gameCopy.fen())
       const newMoves = [...moves, result.san]
       setMoves(newMoves)
       setCurrentMove(newMoves.length - 1)
     }
     return result
-  }
+  }, [game, moves])
 
-  function onDrop(sourceSquare, targetSquare) {
+  const onDrop = useCallback((sourceSquare, targetSquare) => {
     const move = makeAMove({
       from: sourceSquare,
       to: targetSquare,
-      promotion: 'q', // always promote to queen for simplicity
+      promotion: 'q',
     })
     return move !== null
-  }
+  }, [makeAMove])
 
-  function toggleEditMode() {
-    setEditMode(!editMode)
+  const toggleEditMode = useCallback(() => {
+    setEditMode((prev) => !prev)
     if (editMode) {
-      // Exiting edit mode, apply the FEN
       handleFenSubmit()
     }
-  }
+  }, [editMode])
 
-  function handleFenSubmit() {
+  const handleFenSubmit = useCallback(() => {
     try {
       const newGame = new Chess(fenValue)
       setGame(newGame)
@@ -61,9 +60,9 @@ function App() {
     } catch (error) {
       alert('Invalid FEN string')
     }
-  }
+  }, [fenValue])
 
-  function handleMoveSelect(index) {
+  const handleMoveSelect = useCallback((index) => {
     const newGame = new Chess()
     for (let i = 0; i <= index; i++) {
       newGame.move(moves[i])
@@ -71,14 +70,25 @@ function App() {
     setGame(newGame)
     setFen(newGame.fen())
     setCurrentMove(index)
-  }
+  }, [moves])
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const currentFen = game.fen();
-    setIsLoading(true); // Set loading to true when starting the request
-    setSharpness(null); // Reset sharpness to remove previous result
-    setEvaluation(null); // Reset evaluation to remove previous result
+  const resetBoard = useCallback(() => {
+    const newGame = new Chess()
+    setGame(newGame)
+    setFen(newGame.fen())
+    setFenValue(newGame.fen())
+    setMoves([])
+    setCurrentMove(-1)
+    setSharpness(null)
+    setEvaluation(null)
+  }, [])
+
+  const handleSubmit = useCallback(async (e) => {
+    e.preventDefault()
+    const currentFen = game.fen()
+    setIsLoading(true)
+    setSharpness(null)
+    setEvaluation(null)
     try {
       const response = await fetch('https://12d1-2406-7400-75-bb12-88d2-7886-2e25-3068.ngrok-free.app/analyze', {
         method: 'POST',
@@ -86,61 +96,69 @@ function App() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ fen: currentFen }),
-      });
-      const data = await response.json();
-      setSharpness(data.sharpness);
-      setEvaluation(data.evaluation);
+      })
+      const data = await response.json()
+      setSharpness(data.sharpness)
+      setEvaluation(data.evaluation)
     } catch (error) {
-      console.error('Error submitting FEN:', error);
+      console.error('Error submitting FEN:', error)
     } finally {
-      setIsLoading(false); // Set loading to false when the request is complete
+      setIsLoading(false)
     }
-  };
+  }, [game])
 
   return (
     <div className="app">
-      <h1>Sharpness Calculator</h1>
+      <h1>Chess Sharpness Calculator</h1>
       <div className="chess-container">
-        <Chessboard 
-          position={fen} 
-          onPieceDrop={editMode ? undefined : onDrop}
-          boardOrientation={editMode ? 'white' : undefined}
-        />
-        {!editMode && (
-          <MoveTable
-            moves={moves}
-            currentMove={currentMove}
-            onMoveSelect={handleMoveSelect}
+        <div className="chessboard-wrapper">
+          <Chessboard 
+            position={fen} 
+            onPieceDrop={editMode ? undefined : onDrop}
+            boardOrientation={editMode ? 'white' : undefined}
           />
-        )}
-      </div>
-      <div className="fen-container">
-        <form onSubmit={handleSubmit}>
-          <input
-            type="text"
-            value={fenValue}
-            onChange={(e) => setFenValue(e.target.value)}
-            placeholder="Enter FEN notation"
-            disabled={!editMode}
-          />
-          <button type="button" onClick={toggleEditMode}>
-            {editMode ? 'Apply FEN' : 'Edit FEN'}
-          </button>
-          <button type="submit">Calculate Sharpness</button>
-        </form>
-        {isLoading ? (
-          <div className="loader"></div>
-        ) : (
-          <div className="results">
-            {sharpness !== null && (
-              <p>Sharpness: {sharpness.toFixed(2)}</p>
-            )}
-            {evaluation !== null && (
-              <p>Stockfish Evaluation: {evaluation.toFixed(2)}</p>
+        </div>
+        <div className="side-panel">
+          {!editMode && (
+            <div className="move-table-container">
+              <MoveTable
+                moves={moves}
+                currentMove={currentMove}
+                onMoveSelect={handleMoveSelect}
+              />
+            </div>
+          )}
+          <div className="fen-container">
+            <form onSubmit={handleSubmit}>
+              <input
+                type="text"
+                value={fenValue}
+                onChange={(e) => setFenValue(e.target.value)}
+                placeholder="Enter FEN notation"
+                disabled={!editMode}
+              />
+              <button type="button" onClick={toggleEditMode}>
+                {editMode ? 'Apply FEN' : 'Edit FEN'}
+              </button>
+              <button type="submit">Calculate</button>
+              <button type="button" onClick={resetBoard}>Reset</button>
+            </form>
+            {isLoading ? (
+              <div className="loader"></div>
+            ) : (
+              sharpness !== null && evaluation !== null && (
+                <div className="results">
+                  <p>Sharpness: {sharpness.toFixed(2)}</p>
+                  <p>Stockfish Evaluation: {evaluation.toFixed(2)}</p>
+                </div>
+              )
             )}
           </div>
-        )}
+        </div>
       </div>
+      <footer className="credit">
+        <p>Made by Rakshit Singh for testing purposes</p>
+      </footer>
     </div>
   )
 }

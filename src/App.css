@@ -1,55 +1,93 @@
 :root {
-  --primary-color: #3498db;
-  --secondary-color: #2ecc71;
+  --primary-color: #4a90e2;
+  --secondary-color: #50c878;
   --background-color: #2c3e50;
   --text-color: #ecf0f1;
   --border-radius: 8px;
   --table-bg-color: #34495e;
+  --shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+  --input-bg-color: #3a506b;
 }
 
 body {
   background-color: var(--background-color);
   color: var(--text-color);
-  font-family: 'Arial', sans-serif;
+  font-family: 'Roboto', sans-serif;
 }
 
 #root {
-  max-width: 1200px;
+  max-width: 100%;
+  width: 100%;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 1rem;
+  box-sizing: border-box;
 }
 
 .app {
   display: flex;
   flex-direction: column;
   align-items: center;
+  padding: 1rem;
+  min-height: 100vh;
 }
 
 .chess-container {
   display: flex;
-  gap: 2rem;
+  gap: 1rem;
   margin-bottom: 2rem;
-  align-items: flex-start;
-  max-width: 85%;
-  overflow-x: auto;
+  align-items: flex-end; /* Align items to the bottom */
+  width: 100%;
+  max-width: 1200px;
 }
 
 .chess-container > div:first-child {
-  min-width: 300px;
-  max-width: 100%;
+  min-width: 200px; /* Default min-width for smaller screens */
+  max-width: 85%;
+  width: 85%;
+}
+
+@media (min-width: 768px) {
+  .chess-container > div:first-child {
+    min-width: 300px;
+    max-width: 50%;
+  }
+}
+
+@media (min-width: 1024px) {
+  .chess-container {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+
+  .chessboard-wrapper {
+    flex: 1;
+    max-width: none;
+  }
+
+  .side-panel {
+    flex: 1;
+    max-width: none;
+  }
+}
+
+@media (min-width: 1280px) {
+  .chess-container > div:first-child {
+    min-width: 500px;
+  }
 }
 
 .side-panel {
+  width: 300px; /* Fixed width for the side panel */
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
 }
 
 .move-table {
-  width: 360px;
+  width: 100%;
+  max-width: 360px;
   background-color: var(--table-bg-color);
+  box-shadow: var(--shadow);
   border-radius: var(--border-radius);
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   overflow: hidden;
 }
 
@@ -63,8 +101,9 @@ body {
 }
 
 .move-list {
-  max-height: 400px;
+  max-height: 45vh;
   overflow-y: auto;
+  scroll-behavior: smooth; /* Add smooth scrolling */
 }
 
 .move-row {
@@ -105,17 +144,22 @@ body {
 }
 
 .fen-container {
+  margin-top: auto; /* Push the FEN container to the bottom */
+  background-color: var(--table-bg-color);
+  padding: 1.5rem;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
   width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 1rem;
-  margin-top: 1.5rem;
+  margin-top: 1rem;
 }
 
 .fen-container form {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: 1fr auto auto auto;
   gap: 1rem;
   width: 100%;
   max-width: 600px;
@@ -123,23 +167,23 @@ body {
 }
 
 .fen-container input {
-  flex-grow: 1;
-  min-width: 300px;
   padding: 0.75rem;
-  border: 1px solid #ddd;
+  background-color: var(--input-bg-color);
+  color: var(--text-color);
+  border: none;
   border-radius: var(--border-radius);
   font-size: 1rem;
 }
 
 .fen-container button {
-  padding: 0.75rem 1.5rem;
+  padding: 0.5rem 1rem;
   background-color: var(--primary-color);
   color: white;
   border: none;
   border-radius: var(--border-radius);
   cursor: pointer;
   transition: background-color 0.3s, transform 0.1s;
-  font-size: 1rem;
+  font-size: 0.9rem;
   font-weight: 600;
 }
 
@@ -152,21 +196,29 @@ body {
   transform: translateY(0);
 }
 
+.fen-container button[type="button"]:last-child {
+  background-color: #e74c3c;
+}
+
+.fen-container button[type="button"]:last-child:hover {
+  background-color: #c0392b;
+}
+
 button {
   padding: 0.75rem 1.5rem;
-  background-color: var(--secondary-color);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background-color: var(--primary-color);
   color: white;
   border: none;
   border-radius: var(--border-radius);
   cursor: pointer;
-  transition: background-color 0.3s, transform 0.1s;
-  font-size: 1rem;
-  font-weight: 600;
+  transition: background-color 0.3s ease;
 }
 
 button:hover {
-  background-color: #27ae60;
-  transform: translateY(-2px);
+  background-color: #3a7bc8;
 }
 
 button:active {
@@ -184,7 +236,21 @@ button:active {
   }
 
   .move-table {
+    max-width: 100%;
+  }
+
+  .fen-container form {
+    grid-template-columns: 1fr; // Change this line
+    gap: 1rem;
+  }
+
+  .fen-container input,
+  .fen-container button {
     width: 100%;
+  }
+
+  .chessboard-wrapper {
+    max-width: 100%; // Add this line
   }
 }
 
@@ -192,11 +258,11 @@ button:active {
   display: flex;
   align-items: center;
   gap: 1rem;
-  margin-top: 1.5rem;
+  margin-top: 0.5rem;
 }
 
 .board-controls input {
-  width: 200px;
+  width: 150px;
   -webkit-appearance: none;
   appearance: none;
   height: 8px;
@@ -271,7 +337,11 @@ button:active {
 }
 
 h1 {
+  margin-top: 0.5rem; /* Decreased margin-top */
+  margin-bottom: 1rem;
+  text-align: center;
   color: var(--text-color);
+  font-size: 2.5rem;
 }
 
 .fen-container span {
@@ -279,12 +349,55 @@ h1 {
 }
 
 .results {
-  margin-top: 20px;
-  text-align: center;
+  background-color: var(--table-bg-color);
+  padding: 1.5rem;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
+  margin-top: 1.5rem;
 }
 
 .results p {
-  margin: 10px 0;
-  font-size: 18px;
-  font-weight: bold;
+  font-size: 1.2rem;
+  color: var(--text-color);
+}
+
+.credit {
+  margin-top: 2rem;
+  font-style: italic;
+  text-align: center;
+  color: var(--text-color);
+  opacity: 0.7;
+}
+
+.move-table-container {
+  flex: 1;
+  overflow-y: auto;
+  max-height: calc(100% - 150px); /* Adjust based on your FEN container height */
+}
+
+@media (max-width: 1023px) {
+  .chess-container {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .side-panel {
+    width: 100%;
+    max-width: 600px;
+  }
+
+  .move-table-container {
+    max-height: 300px; /* Adjust for mobile view */
+    overflow-y: auto; /* Ensure scrolling is enabled */
+    scroll-behavior: smooth; /* Add smooth scrolling */
+  }
+}
+
+/* New styles for auto-scroll functionality */
+.auto-scroll {
+  scroll-behavior: smooth;
+}
+
+.user-scrolled {
+  scroll-behavior: auto;
 }
