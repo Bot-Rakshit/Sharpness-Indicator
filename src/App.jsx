@@ -1,9 +1,10 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { Chess } from 'chess.js'
 import { Chessboard } from 'react-chessboard'
 import './App.css'
 import './Loader.css'
 import MoveTable from './MoveTable'
+import PgnAnalysis from './PgnAnalysis'
 
 function App() {
   const [game, setGame] = useState(new Chess())
@@ -15,6 +16,8 @@ function App() {
   const [sharpness, setSharpness] = useState(null)
   const [evaluation, setEvaluation] = useState(null)
   const [isLoading, setIsLoading] = useState(false)
+  const [pgnText, setPgnText] = useState('')
+  const dialogRef = useRef(null)
 
   useEffect(() => {
     setFenValue(game.fen())
@@ -107,18 +110,80 @@ function App() {
     }
   }, [game])
 
+  const handlePgnMoveSelect = useCallback((index) => {
+    handleMoveSelect(index)
+  }, [handleMoveSelect])
+
+  const openPgnDialog = () => {
+    if (dialogRef.current) {
+      dialogRef.current.showModal()
+    }
+  }
+
+  const closePgnDialog = () => {
+    if (dialogRef.current) {
+      dialogRef.current.close()
+    }
+  }
+
+  const handlePgnSubmit = (e) => {
+    e.preventDefault();
+    closePgnDialog();
+    if (pgnText.trim()) {
+      const chess = new Chess();
+      try {
+        chess.loadPgn(pgnText);
+        const loadedMoves = chess.history();
+        if (loadedMoves.length > 0) {
+          handlePgnLoaded(loadedMoves);
+        } else {
+          throw new Error('No moves found in PGN');
+        }
+      } catch (error) {
+        console.error('Error loading PGN:', error);
+        alert('Invalid PGN format or no moves found');
+      }
+    }
+  }
+
+  const handlePgnLoaded = (loadedMoves) => {
+    if (loadedMoves && loadedMoves.length > 0) {
+      setMoves(loadedMoves);
+      const newGame = new Chess();
+      try {
+        loadedMoves.forEach(move => newGame.move(move));
+        setGame(newGame);
+        setFen(newGame.fen());
+        setCurrentMove(loadedMoves.length - 1);
+        setPgnText(newGame.pgn());
+      } catch (error) {
+        console.error('Error applying moves:', error);
+        alert('Error applying moves from PGN');
+      }
+    } else {
+      console.error('No moves loaded from PGN');
+      alert('No valid moves found in the PGN');
+    }
+  }
+
   return (
     <div className="app">
-      <h1>Chess Sharpness Calculator</h1>
-      <div className="chess-container">
-        <div className="chessboard-wrapper">
+      <header>
+        <h1>Chess Sharpness Calculator</h1>
+      </header>
+      <main className="chess-container">
+        <section className="chessboard-section">
           <Chessboard 
             position={fen} 
             onPieceDrop={editMode ? undefined : onDrop}
             boardOrientation={editMode ? 'white' : undefined}
           />
-        </div>
-        <div className="side-panel">
+          <div className="board-controls">
+            <button onClick={resetBoard}>Reset Board</button>
+            <button onClick={openPgnDialog}>Analyze PGN</button>
+          </div>
+        </section>
+        <section className="side-panel">
           {!editMode && (
             <div className="move-table-container">
               <MoveTable
@@ -137,28 +202,45 @@ function App() {
                 placeholder="Enter FEN notation"
                 disabled={!editMode}
               />
-              <button type="button" onClick={toggleEditMode}>
-                {editMode ? 'Apply FEN' : 'Edit FEN'}
-              </button>
-              <button type="submit">Calculate</button>
-              <button type="button" onClick={resetBoard}>Reset</button>
+              <div className="fen-buttons">
+                <button type="button" onClick={toggleEditMode}>
+                  {editMode ? 'Apply FEN' : 'Edit FEN'}
+                </button>
+                <button type="submit">Calculate</button>
+              </div>
             </form>
             {isLoading ? (
               <div className="loader"></div>
             ) : (
               sharpness !== null && evaluation !== null && (
                 <div className="results">
-                  <p>Sharpness: {sharpness.toFixed(2)}</p>
-                  <p>Stockfish Evaluation: {evaluation.toFixed(2)}</p>
+                  <p>Sharpness: <span>{sharpness.toFixed(2)}</span></p>
+                  <p>Stockfish Evaluation: <span>{evaluation.toFixed(2)}</span></p>
                 </div>
               )
             )}
           </div>
-        </div>
-      </div>
+        </section>
+      </main>
+      <PgnAnalysis onMoveSelect={handlePgnMoveSelect} pgnText={pgnText} onPgnLoaded={handlePgnLoaded} />
       <footer className="credit">
         <p>Made by Rakshit Singh for testing purposes</p>
       </footer>
+      <dialog ref={dialogRef} className="pgn-dialog">
+        <form onSubmit={handlePgnSubmit}>
+          <h2>Paste your PGN here</h2>
+          <textarea
+            value={pgnText}
+            onChange={(e) => setPgnText(e.target.value)}
+            rows="10"
+            cols="50"
+          ></textarea>
+          <div className="dialog-buttons">
+            <button type="submit">Analyze</button>
+            <button type="button" onClick={closePgnDialog}>Cancel</button>
+          </div>
+        </form>
+      </dialog>
     </div>
   )
 }

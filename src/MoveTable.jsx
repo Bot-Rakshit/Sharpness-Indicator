@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 
-const MoveTable = ({ moves, currentMove, onMoveSelect }) => {
+const MoveTable = ({ moves = [], currentMove = -1, onMoveSelect }) => {
   const moveListRef = useRef(null);
 
   useEffect(() => {
@@ -9,6 +9,10 @@ const MoveTable = ({ moves, currentMove, onMoveSelect }) => {
       moveListRef.current.scrollTop = moveListRef.current.scrollHeight;
     }
   }, [moves]);
+
+  if (!moves || moves.length === 0) {
+    return <div className="move-table">No moves available</div>;
+  }
 
   return (
     <div className="move-table">
@@ -39,9 +43,10 @@ const MoveTable = ({ moves, currentMove, onMoveSelect }) => {
 };
 
 MoveTable.propTypes = {
-  moves: PropTypes.arrayOf(PropTypes.string).isRequired,
-  currentMove: PropTypes.number.isRequired,
+  moves: PropTypes.arrayOf(PropTypes.string),
+  currentMove: PropTypes.number,
   onMoveSelect: PropTypes.func.isRequired,
 };
+
 
 export default MoveTable;

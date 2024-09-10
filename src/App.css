@@ -26,60 +26,93 @@ body {
 .app {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  padding: 1rem;
   min-height: 100vh;
+  padding: 2rem;
+  box-sizing: border-box;
 }
 
-.chess-container {
+header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+main.chess-container {
+  display: flex;
+  gap: 2rem;
+  justify-content: center;
+  flex-grow: 1;
+}
+
+.chessboard-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.board-controls {
   display: flex;
   gap: 1rem;
-  margin-bottom: 2rem;
-  align-items: flex-end; /* Align items to the bottom */
-  width: 100%;
-  max-width: 1200px;
-}
-
-.chess-container > div:first-child {
-  min-width: 200px; /* Default min-width for smaller screens */
-  max-width: 85%;
-  width: 85%;
-}
-
-@media (min-width: 768px) {
-  .chess-container > div:first-child {
-    min-width: 300px;
-    max-width: 50%;
-  }
-}
-
-@media (min-width: 1024px) {
-  .chess-container {
-    flex-direction: row;
-    align-items: flex-start;
-  }
-
-  .chessboard-wrapper {
-    flex: 1;
-    max-width: none;
-  }
-
-  .side-panel {
-    flex: 1;
-    max-width: none;
-  }
-}
-
-@media (min-width: 1280px) {
-  .chess-container > div:first-child {
-    min-width: 500px;
-  }
+  margin-top: 1rem;
 }
 
 .side-panel {
-  width: 300px; /* Fixed width for the side panel */
   display: flex;
   flex-direction: column;
+  gap: 1rem;
+  width: 300px;
+}
+
+.move-table-container {
+  flex-grow: 1;
+  overflow-y: auto;
+}
+
+.fen-container {
+  background-color: var(--table-bg-color);
+  padding: 1.5rem;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
+}
+
+.fen-container form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.fen-buttons {
+  display: flex;
+  gap: 1rem;
+}
+
+.results {
+  margin-top: 1rem;
+}
+
+.results p {
+  display: flex;
+  justify-content: space-between;
+}
+
+.results span {
+  font-weight: bold;
+}
+
+footer {
+  margin-top: 2rem;
+  text-align: center;
+}
+
+@media (max-width: 1024px) {
+  main.chess-container {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .side-panel {
+    width: 100%;
+    max-width: 500px;
+  }
 }
 
 .move-table {
@@ -141,29 +174,6 @@ body {
 .white-move,
 .black-move {
   flex: 1;
-}
-
-.fen-container {
-  margin-top: auto; /* Push the FEN container to the bottom */
-  background-color: var(--table-bg-color);
-  padding: 1.5rem;
-  border-radius: var(--border-radius);
-  box-shadow: var(--shadow);
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1rem;
-  margin-top: 1rem;
-}
-
-.fen-container form {
-  display: grid;
-  grid-template-columns: 1fr auto auto auto;
-  gap: 1rem;
-  width: 100%;
-  max-width: 600px;
-  justify-content: center;
 }
 
 .fen-container input {
@@ -400,4 +410,73 @@ h1 {
 
 .user-scrolled {
   scroll-behavior: auto;
+}
+
+.pgn-analysis {
+  margin-top: 2rem;
+  width: 100%;
+  max-width: 1200px;
+  background-color: var(--table-bg-color);
+  padding: 1.5rem;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
+}
+
+.chart-container {
+  margin-top: 1rem;
+  height: 400px;
+  background-color: rgba(255, 255, 255, 0.1);
+  padding: 1rem;
+  border-radius: var(--border-radius);
+}
+
+@media (max-width: 768px) {
+  .chart-container {
+    height: 300px;
+  }
+}
+
+.analyze-pgn-btn {
+  margin-top: 1rem;
+  width: 100%;
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.analyze-pgn-btn:hover {
+  background-color: #3a7bc8;
+}
+
+.pgn-dialog {
+  padding: 1rem;
+  border-radius: 8px;
+  border: none;
+}
+
+.pgn-dialog::backdrop {
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.pgn-dialog form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.pgn-dialog textarea {
+  resize: vertical;
+}
+
+.dialog-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
 }
