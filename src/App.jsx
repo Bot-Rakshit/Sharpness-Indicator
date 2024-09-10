@@ -43,11 +43,11 @@ function App() {
   }, [makeAMove])
 
   const toggleEditMode = useCallback(() => {
-    setEditMode((prev) => !prev)
     if (editMode) {
-      handleFenSubmit()
+      handleFenSubmit();
     }
-  }, [editMode])
+    setEditMode((prev) => !prev);
+  }, [editMode, handleFenSubmit]);
 
   const handleFenSubmit = useCallback(() => {
     try {
